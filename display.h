@@ -7,7 +7,7 @@ void DisplayInit(void);
 void LcdCommand(unsigned char byte);
 void LcdData(unsigned char byte);
 void SetCursor(unsigned int line, unsigned int column);
-void Print(char* str);
+void LcdPrint(char* str);
 void Delay(void) { for(int i=0; i<100; i++); }
 
 void DisplayInit(void){
@@ -27,4 +27,44 @@ void DisplayInit(void){
     Delay();
 
     LcdCommand(0b00111000); // Set 8-bit 2-line mode
+}
+
+void LcdCommand(unsigned char byte){
+    IOCLR1 = 0x00FF0000;
+    IOSET1 = byte << 16;
+
+    IOCLR1 = ENABLE_PIN | REGISTER_SELECT;
+    Delay();
+    IOSET1 = ENABLE_PIN;
+    Delay();
+    IOCLR1 = ENABLE_PIN;
+    Delay();
+}
+
+void LcdData(unsigned char byte){
+    IOCLR1 = 0x00FF0000;
+    IOSET1 = byte << 16;
+
+    IOCLR1 = ENABLE_PIN;
+    Delay();
+    IOSET1 = REGISTER_SELECT;
+    Delay();
+    IOSET1 = ENABLE_PIN;
+    Delay();
+    IOCLR1 = ENABLE_PIN | REGISTER_SELECT;
+    Delay();
+}
+
+void SetCursor(unsigned int line, unsigned int column){
+    if (line == 0)
+        LcdCommand(0x80);
+    else 
+        LcdCommand(0xc0);
+}
+
+void LcdPrint(char* str){
+    while(*str){
+        LcdData(*str);
+        str++;
+    }
 }
