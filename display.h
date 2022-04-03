@@ -22,20 +22,19 @@ writeLCD(uint8 reg, uint8 data)
 	  IOCLR1 = LCD_RS;
 	else
 	  IOSET1 = LCD_RS;
-	  
-    IOCLR0 = LCD_RW;
+
+        IOCLR0 = LCD_RW;
 	IOCLR1 = LCD_DATA;
 	IOSET1 = ((uint32)data << 16) & LCD_DATA;
-//printf("\nwrite: %x", data);
 	
 	IOSET1 = LCD_E;
-//	osSleep(1);
+
 	for(i=0; i<16; i++)
-    asm volatile (" nop"); //delay 15 ns x 16 = about 250 ns delay
+        asm volatile (" nop"); //15ns x 16 = about 250 ns
 	IOCLR1 = LCD_E;
-//	osSleep(1);
+
 	for(i=0; i<16; i++)
-    asm volatile (" nop"); //delay 15 ns x 16 = about 250 ns delay
+        asm volatile (" nop"); //15ns x 16 = about 250 ns
 }
 
 static void
@@ -60,7 +59,7 @@ void clearDisplay() {
     delay2ms();
 }
 
-void DisplayInit(void){
+void DisplayInit(void) {
 	IODIR1 |= (LCD_DATA | LCD_E | LCD_RS);
 	IOCLR1  = (LCD_DATA | LCD_E | LCD_RS);
 

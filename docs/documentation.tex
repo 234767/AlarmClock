@@ -1,0 +1,104 @@
+\documentclass[12pt]{article}
+\usepackage{float}
+\floatstyle{plain}
+\newfloat{program}{thp}{lst}
+\floatname{program}{Listing}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\lstset{
+    language=C,
+    tabsize=4,
+    basicstyle=\scriptsize\ttfamily,
+    breaklines=true,
+    frame=l,
+    rulecolor=\color{black},
+    numbers = left,
+    numberstyle=\tiny\ttfamily,
+    numbersep=10pt,
+    stepnumber = 1,
+    keywordstyle=\bf\color{blue},
+    commentstyle=\color{black!30},
+    showspaces=false,
+    showtabs=false,
+    showstringspaces=false,
+    stringstyle=\color{brown!50!orange},
+    morekeywords = {
+        asm,
+        uint8,
+        uint16,
+        uint32,
+        int8,
+        int16,
+        int32
+    }
+}
+
+\newcommand{\code}[3]{\lstinputlisting[firstline=#1, lastline=#2, firstnumber=#1]{../#3}}
+
+\parindent=0em
+\parskip=.8em
+
+\title{\huge\bf\vspace{-1em} Alarm Clock \\ Embedded Systems Project Report\\\vspace{2em}{\large\normalfont Monday 10:00 lab} }
+
+\author{
+    Jakub Pawlak \\
+    \texttt{234767@edu.p.lodz.pl}
+    \and
+    Artur Pietrzak \\
+    \texttt{234768@edu.p.lodz.pl}
+    \and
+    Juliusz Szymajda \\
+    \texttt{234769@edu.p.lodz.pl}
+}
+\begin{document}
+    \maketitle
+    \clearpage
+    \large
+    \section*{Devices used:}
+    Eduboard LPC2148 v1.0
+    \section*{Interfaces used:}
+    GPIO, I\textsuperscript{2}C, SPI
+    \section*{Devices used:}
+    \begin{enumerate}
+        \item LCD display
+        \item RTC
+        \item Button
+        \item Joystick
+        \item Buzzer
+        \item Timer
+        \item EEPROM
+    \end{enumerate}
+    \clearpage
+    \tableofcontents
+    \listof{program}{Code Listings}
+    \clearpage
+
+    \section{Project Description}
+    \subsection{General description}
+    \section{Peripherals and interface configuration}
+    \subsection{LCD Display}
+    \begin{program}[h]
+        \code{62}{95}{display.h}
+        \caption{LCD setup function}
+    \end{program}
+
+    \clearpage
+    \section{Failure Mode and Effect Analysis}
+    \begin{table}[H]\centering
+        \newcommand{\critical}{\color{red} Critical}
+        \begin{tabular}{|l|c|}
+            \hline
+            \bf Component   &   \bf Severity    \\\hline
+            Microcontroller &   \critical       \\\hline
+            Power Supply    &   \critical\footnotemark       \\\hline
+            RTC             &   \critical       \\\hline
+            LCD Display     &   High            \\\hline
+            Speaker         &   High            \\\hline
+            Button          &   High            \\\hline
+            Joystick        &   High            \\\hline
+        \end{tabular}
+        \caption{Severity of component's failure}
+    \end{table}
+    \footnotetext[1]{Long-term power supply failures are of critical severity, but in case of short pause in power delivery, the system is able to recover using the RTC and the data stored in EEPROM}
+\end{document}
