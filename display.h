@@ -23,7 +23,7 @@ writeLCD(uint8 reg, uint8 data)
 	else
 	  IOSET1 = LCD_RS;
 
-        IOCLR0 = LCD_RW;
+    IOCLR0 = LCD_RW;
 	IOCLR1 = LCD_DATA;
 	IOSET1 = ((uint32)data << 16) & LCD_DATA;
 	
