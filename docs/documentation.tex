@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage{float}
 \floatstyle{plain}
 \newfloat{program}{thp}{lst}
@@ -76,6 +76,26 @@
 
     \section{Project Description}
     \subsection{General description}
+    The project is an digital clock with the ability to set an alarm for a given hour.
+    The device displays current time on the LCD display.
+    Using button and joystick it is possible to set the current time, or set an alarm.
+    If the alarm is set and the alarm time is the current time, the buzzer emits a sound until the alarm is turned off.
+
+    \subsection{Setting the alarm}
+    The alarm setting mode it entered by pressing down the joystick center push-down switch.
+    When in alarm setting mode, the user can change the alarm time by selecting the digit with left/right movement, and selecting the value with up/down movement.
+    After the correct time is selected, alarm is set by pressing the button.
+
+    When alarm is turned on, it can be turned off by short press of the button.
+
+    \subsection{Changing the current time}
+    The time setting mode is entered by holding down the button.
+    Then, the time is set with the joystick in the similar way, the alarm is set.
+    After setting the time it is set by short press of the button.
+
+    \subsection{Turning off the alarm}
+    When the alarm clock starts emmiting sound, the user can turn it off by pressing the button.
+
     \section{Peripherals and interface configuration}
     \subsection{LCD Display}
     \begin{program}[h]
@@ -83,7 +103,15 @@
         \caption{LCD setup function}
     \end{program}
 
-    \clearpage
+    \subsection{GPIO}
+
+    \subsection{I\textsuperscript{2}C}
+
+    \subsection{SPI}
+
+    \subsection{Debounce Timer}
+
+
     \section{Failure Mode and Effect Analysis}
     \begin{table}[H]\centering
         \newcommand{\critical}{\color{red} Critical}
@@ -101,4 +129,9 @@
         \caption{Severity of component's failure}
     \end{table}
     \footnotetext[1]{Long-term power supply failures are of critical severity, but in case of short pause in power delivery, the system is able to recover using the RTC and the data stored in EEPROM}
+
+    \addcontentsline{toc}{section}{References}
+    \nocite{*}
+    \bibliographystyle{unsrt}
+    \bibliography{references}
 \end{document}
