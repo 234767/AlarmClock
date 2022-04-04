@@ -10,6 +10,7 @@ struct time {
 typedef struct time Time;
 
 Time currentTime;
+uint8 led12;
 
 static void displayTime(){
     SetCursor(0,0);
@@ -24,7 +25,14 @@ static void displayTime(){
 }
 
 static void onTimerFire(void) {
-
+    if (led12 == 0) {
+        IOCLR0 = (1 << 12);
+        led12 = 1;
+    }
+    else {
+        IOSET0 = (1 << 12);
+        led12 = 0;
+    }
     //increment time by 1 second
     currentTime.second++;
     if (currentTime.second >= 60){
@@ -44,6 +52,8 @@ static void onTimerFire(void) {
 }
 
 int main(void) {
+    led12 = 0;
+    IODIR0 |= ((1 << 12) | (1<<13));
     currentTime.hour = 0;
     currentTime.minute = 0;
     currentTime.second = 0;
@@ -51,6 +61,7 @@ int main(void) {
     startTimer1(10, (uint32) onTimerFire); // every 1 second
     while(1){
         if(isButtonPressed()){
+            IO0SET = (1 << 13);
             clearDisplay();
             displayTime();
             SetCursor(1,1);
@@ -63,6 +74,7 @@ int main(void) {
             }
         }
         delay2ms();
+        IO0CLR = (1 << 13);
     }
     return 0;
 }
