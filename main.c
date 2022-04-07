@@ -96,6 +96,79 @@ void handleModeO(){
     }
 }
 
+void increment() {
+    switch (mode)
+    {
+    case 1:
+        currentTime.hour += 1;
+        currentTime.hour %= 24;
+        break;
+    case 2:
+        currentTime.minute += 1;
+        currentTime.minute %= 60;
+        break;
+    case 3:
+        currentTime.second += 1;
+        currentTime.second %= 60;
+    default:
+        break;
+    }
+}
+
+void decrement() {
+    switch (mode) 
+    {
+    case 1:
+        if (currentTime.hour == 0)
+            currentTime.hour = 23;
+        else
+            currentTime.hour -= 1;
+        break;
+    case 2:
+        if (currentTime.minute == 0)
+            currentTime.minute = 59;
+        else
+            currentTime.minute -= 1;
+        break;
+    case 3:
+        if (currentTime.second == 0)
+            currentTime.second = 59;
+        else
+            currentTime.second -= 1;
+        break;
+    default:
+        break;
+    }
+}
+
+void handleTimeSet() {
+    if (isButtonPressed()) {
+        mode = 0;
+        return;
+    }
+    char input = getYoyInput();
+    switch ( input)
+    {
+    case 0:
+        return;
+    case 'u':
+        increment();
+        break;
+    case 'd':
+        decrement();
+        break;
+    case 'r':
+        if (mode < 3) mode++;
+        break;
+    case 'l':
+        if (mode > 1) mode--;
+        break;
+    default:
+        break;
+    }
+    delayMs(500,0);
+}
+
 int main(void) {
     led12 = 0;
     IODIR0 |= ((1 << 12) | (1<<13));
@@ -106,8 +179,13 @@ int main(void) {
     // startTimer1(10, (uint32) onTimerFire); // every 1 second
     init_irq(1000,500);
     while(1){
-        
-        
+        if (mode == 0) {
+            handleModeO();
+        }
+        else {
+            handleTimeSet();
+        }
+        delay2ms();
     }
     return 0;
 }
