@@ -83,13 +83,15 @@ void handleModeO(){
         IO0SET = (1 << 13);
         clearDisplay();
         displayTime();
-        SetCursor(1,1);
+        SetCursor(1,0);
         delayMs(500,0); // half second delay
         if (isButtonPressed()) {
-            LcdPrint("looong");
+            LcdPrint("Time set");
+            cursor_enable(1);
+            mode = 1;
         }
         else {
-            LcdPrint("shrt");
+            LcdPrint("Pres longer");
         }
         delay2ms();
         IO0CLR = (1 << 13);
@@ -144,6 +146,7 @@ void decrement() {
 void handleTimeSet() {
     if (isButtonPressed()) {
         mode = 0;
+        cursor_enable(0);
         return;
     }
     char input = getYoyInput();

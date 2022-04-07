@@ -105,6 +105,16 @@ void SetCursor(unsigned int line, unsigned int column){
         LcdCommand(0xc0 + column);
 }
 
+void cursor_enable(unsigned char on) {
+    if (on == FALSE) {
+        LcdCommand(0x0c);
+    }
+    else {
+        LcdCommand(0x0e);
+    }
+    delay37us();
+}
+
 void LcdPrint(char* str){
     while(*str){
         LcdData(*str);
