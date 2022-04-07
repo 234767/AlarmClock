@@ -35,6 +35,7 @@ writeLCD(uint8 reg, uint8 data)
 
 	for(i=0; i<16; i++)
         asm volatile (" nop"); //15ns x 16 = about 250 ns
+    delay2ms();
 }
 
 static void
