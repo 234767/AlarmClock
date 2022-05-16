@@ -1,4 +1,4 @@
-\documentclass[11pt]{article}
+\documentclass[10pt]{article}
 \usepackage{float}
 \floatstyle{plain}
 \newfloat{program}{thp}{lst}
@@ -34,7 +34,7 @@
     }
 }
 
-\newcommand{\code}[3]{\lstinputlisting[firstline=#1, lastline=#2, firstnumber=#1]{../#3}}
+\newcommand{\code}[3]{\lstinputlisting[firstline=#1, lastline=#2]{../#3}}
 
 \parindent=0em
 \parskip=.8em
@@ -56,7 +56,8 @@
     \clearpage
     \large
     \section*{Devices used:}
-    Eduboard LPC2148 v1.0
+    Eduboard LPC2148 v1.0 \\[1em]
+    No external devices used
     \section*{Interfaces used:}
     GPIO, I\textsuperscript{2}C, SPI
     \section*{Devices used:}
@@ -81,6 +82,23 @@
     Using button and joystick it is possible to set the current time, or set an alarm.
     If the alarm is set and the alarm time is the current time, the buzzer emits a sound until the alarm is turned off.
 
+    \subsection{Project functionalities}
+    \begin{table}[H]\centering
+        \begin{tabular}{|l|l|l|}
+            \hline
+            \bf Functionality   & \bf Person Responsible    & \bf Implementation status                     \\ \hline
+            Timer               & Jakub Pawlak              & Implemented                                   \\ \hline
+            RTC                 & Artur Pietrzak            & \color{orange!80!red} Partially implemented   \\ \hline
+            SPI                 & Artur Pietrzak            & \color{red} Not implemented                   \\ \hline
+            LCD Display         & Jakub Pawlak              & Implemented                                   \\ \hline
+            Buttons \& Joystick & Artur Pietrzak            & Implemented                                   \\ \hline
+            Buzzer              & Jakub Pawlak              & \color{red} Not implemented                   \\ \hline
+            EEPROM              & Juliusz Szymajda          & \color{red} Not implemented                   \\ \hline
+            I2C                 & Juliusz Szymajda          & \color{red} Not implemented                   \\ \hline
+        \end{tabular}
+        \caption{Project functionalities and responsible persons}
+    \end{table}
+
     \subsection{Setting the alarm}
     The alarm setting mode it entered by pressing down the joystick center push-down switch.
     When in alarm setting mode, the user can change the alarm time by selecting the digit with left/right movement, and selecting the value with up/down movement.
@@ -97,19 +115,24 @@
     When the alarm clock starts emmiting sound, the user can turn it off by pressing the button.
 
     \section{Peripherals and interface configuration}
+    
+    \subsection{GPIO}
+    
     \subsection{LCD Display}
-    \begin{program}[h]
+    \begin{program}[H]
         \code{63}{96}{display.h}
         \caption{LCD setup function}
     \end{program}
-
-    \subsection{GPIO}
 
     \subsection{I\textsuperscript{2}C}
 
     \subsection{SPI}
 
     \subsection{Debounce Timer}
+    \begin{program}[H]
+        \code{11}{19}{timer.h}
+        \caption{LCD setup function}
+    \end{program}
 
 
     \section{Failure Mode and Effect Analysis}
