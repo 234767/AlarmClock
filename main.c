@@ -216,6 +216,48 @@ static void sdelay (tU32 seconds)
 }
  
 int main(void) {
+    /*
+	// RTC Init
+	// currentTime is used to retreive time from the RTC
+	RTC_Time setTime, alarmTime, currentTime;
+	ILR = 0x0;    // disable RTC interrupts 
+	CCR = 0x02;   // reset Clock Tick Counter
+	CCR = 0x00;
+	CIIR = 0x00;  // disable Counter Increment Interrupt (seconds increment)
+	AMR = 0x00;   // disable Alarm Mask Register
+
+	// prescaler - enables getting integers from high frequency signal such as RTC
+	// PCLK for LPC2148 - 15MHz
+	// Prescaler Integer  = (PCLK/32768) – 1              => in our case 456   = 0x01C8
+	// Prescaler Fraction = PCLK – ((PREINT + 1) * 32768) => in our case 25024 = 0x61C0
+	PREINT = 0x01C8; 
+	PREFRAC = 0x61C0;
+
+	// set starting time to 10:20:30 
+	setTime.seconds = 30;
+	setTime.minutes = 20;
+	setTime.hours = 10;
+	RTC_SetTime(setTime);
+
+    CIIR = 0x01; // enable Counter Increment Interrupt (seconds increment)
+
+	// set alarm time to 10:20:50
+	alarmTime.seconds = 50;
+	alarmTime.minutes = 20;
+	alarmTime.hours = 10;
+	RTC_AlarmTime(alarmTime);
+
+    CCR = 0x01; // enable Cock Control Register
+    // ILR = 0x03; // enable RTC interrupts but idk if we want to use it
+
+	// end of RTC init
+	// RTC stores time even if device is disabled, so we can comment lines above
+	// after setting the time or wrap this into a function
+
+	// to retreive time
+	currentTime = RTC_GetTime();
+    */
+
     led12 = 0;
     IODIR0 |= ((1 << 12) | (1<<13));
     currentTime.hour = 0;
