@@ -120,9 +120,76 @@
     \subsection{GPIO}
     
     \subsection{LCD Display}
+    \subsubsection{Setup}
+    We begin setting up the lcd by configuring the IODIR registers to set the appropriate pins as output and clear them.
+    The pins used are data pins P1.16 to P1.23, represented as {LCD\_DATA}, lcd enable pin P1.25 (LCD\_E), lcd \mbox{read/write} pin P0.22 (LCD\_RW), register select P1.24 (LCD\_RS), and backlight P0.30 (LCD\_BACKLIGHT).
+
+    Next, we proceed by sending a command $(38)_{16}$, which represents the `Function Set' instruction.
+    We set the data length to 8 bits, and the number of display lines to 2.
+
+    Next, we send display on/off command, to reset the display.
+
+    Then, we clear the display and send the $(06)_{16}$ command, which sets the cursor direction to `increment'.
+
+    Finally, we turn on the display, without cursor, and set cursor to home position.
+
+    All of the values to send, were taken from the instruction table in the display driver manual \cite[p.24]{display-man}
+
     \begin{program}[H]
         \code{63}{96}{display.h}
         \caption{LCD setup function}
+    \end{program}
+
+    \subsubsection{Sending data to the display}
+
+    \begin{program}[H]
+        \code{16}{52}{display.h}
+        \caption{Functions for using the display}
+        \label{lst:display-util-functions}
+    \end{program}
+
+    The core of interaction with the LCD is the \texttt{writeLCD} function, which takes 2 parameters - register (0 --- instruction or 1 --- data),
+    and the actual 8-bit data we want to send. 
+    We begin by setting the register select pin (lines 6--9).
+
+    Before we send any data, we clear the read/write pin, to indicate that we want to write data to the display.
+    Then we clear the data pins, and set the value in line 13.
+    We first have to shift the value by 16 bits to the left, because we use pins P1.16--P1.23, and then we mask them with LCD\_DATA to make sure that we do not set any other pins.
+
+    \pagebreak
+    After setting the data pins, we set the LCD\_E pin, which starts the data read. 
+    After some delay, we stop the data transmission by clearing LCD\_E pin and wait an additional delay before the next piece of data can be sent.
+
+    \subsubsection{Moving the cursor}
+    The text that is currently displayed on the LCD is stored in so-called `display data RAM' (DDRAM). 
+    The cursor is located at whatever address is currently stored at the DDRAM address counter \cite[p.21]{display-man}.
+
+    Therefore, we can change the cursor position, by changing the address in the AC.
+    Luckily, the LDC controller has an instruction for just that purpose.
+    It is used by sending a command with bit 7 set, followed by 7-bit DDRAM address.
+
+    The first row is addresses $(00)_{16}$ -- $(27)_{16}$, and the second row is addresses $(40)_{16}$ -- $(67)_{16}$ \cite[p.11]{display-man}.
+
+    Therefore, for setting the cursor position, we created the following function:
+    \begin{program}[H]
+        \code{108}{116}{display.h}
+        \caption{Function for controlling the cursor position}
+    \end{program}
+
+    Firstly, we limit the column to not be greater than 39, as the DDRAM only has 40 characters per line.
+
+    Then, we send the `Set DDRAM address' command with the appropriate address.
+    If we want to set the position in the first line, we send $(80)_{16}$ (7-th bit set, indicating command) followed by the column, as the 1st line address starts from 0.
+    If we want to set the position in the second line, instead of $(80)_{16}$ we use $(\mathrm{C0})_{16}$, which is $(80)_{16}$ (7th bit) + $(40)_{16}$ (starting address of the 2nd line).
+
+    \subsubsection{Writing text}
+
+    Writing text to display is very simple, we just send data, and the cursor automatically increments position after each character.
+    We just loop over the array of characters and write each one using the \texttt{LcdData} function from listing \ref{lst:display-util-functions}.
+
+    \begin{program}[H]
+        \code{118}{124}{display.h}
+        \caption{Function for writing text to the display}
     \end{program}
 
     \subsection{I\textsuperscript{2}C}
@@ -264,7 +331,34 @@ bool RTC_Compare(RTC_Time t1, RTC_Time t2)
 	\end{lstlisting}
 	The function is used to compare two RTC\_Time structs by comparing each field of the struct (seconds, minutes and hours).
 
+    \subsection{Timer}
+
+    For producing precise delay we use timer 0 of the microcontroller.
+    
+    To start, we reset and disable the timer, by writing $2$ (bit 1) to the timer control register (TCR). 
+    Then, we can write the values controlling the delay.
+    Firstly we write the prescaler to prescale counter (PC).
+    Then, we write actual delay length to the match register 0 (MR0).
+    We calculate the necessary number of ticks by multiplying the clock frequency by 5, which is the PLL multiplier, and then dividing by 1000 to get ticks per 1 ms instead of 1 s.
+
+    Then, we write 6 (bits 1 and 2) to the match control register (MCR) to indicate that we want the timer to stop and reset at MR0 match.
+    Finally we write 1 to the control register to enable the timer and start counting \cite[p.251]{lpc2148-manual}.
+
+    \begin{program}[H]
+        \code{11}{19}{timer.h}
+        \caption{Timer delay function}
+    \end{program}
+
     \section{Failure Mode and Effect Analysis}
+
+    \subsection{Failure severity}
+
+    The project depends on its components to be able to function properly.
+    However, not all of them are equally impornant --- some are necessary for the usage of the project,
+    while others just provide additional functionalities.
+
+    The table bellow presents a list of components considered in failure effect analysis, as well as the significance of it's failure.
+
     \begin{table}[H]\centering
         \newcommand{\critical}{\color{red} Critical}
         \begin{tabular}{|l|c|}
@@ -274,13 +368,33 @@ bool RTC_Compare(RTC_Time t1, RTC_Time t2)
             Power Supply    &   \critical\footnotemark      \\\hline
             RTC             &   \critical                   \\\hline
             LCD Display     &   High                        \\\hline
-            Speaker         &   High                        \\\hline
-            Button          &   High                        \\\hline
-            Joystick        &   High                        \\\hline
+            Buzzer          &   Medium                      \\\hline
+            Button          &   Medium                      \\\hline
+            Joystick        &   Medium                      \\\hline
+            EEPROM          &   Low                         \\\hline
         \end{tabular}
         \caption{Severity of component's failure}
     \end{table}
     \footnotetext[1]{Long-term power supply failures are of critical severity, but in case of short pause in power delivery, the system is able to recover using the RTC and the data stored in EEPROM}
+
+    The most crucial elements of the project are the microcontroller, power supply, and RTC.
+    The microcontroller must not fail, because it is responsible for all of the logic of the device.
+    The power supply must also be functioning, because there is no backup battery able to sustain the device operation.
+    The RTC is necessary for the operation of the project, because it ensures the correctness of the told time.
+
+    The failure of the LCD display is of high severity, because is is the main way of interacting with the clock.
+    However, it is not of critical severity, because even without the display, if the alarm was set, it will ring at the specified time.
+
+    The buzzer, button and joystick are used for the alarm, which is the additional functionality of the clock.
+    Without them it is still possible to use the device for telling the current time.
+
+    The EEPROM failure is of the low severity, because it is only used for backup storage in case of short power supply failure.
+    In the normal circumstances, it's failure would not at all impact the usability of the device.
+
+    \subsection{Failure detection}
+
+    The failure of the microcontroller would be very easily noticeable, as it would probably result in a complete failure of the device.
+    The lack of power 
 
     \addcontentsline{toc}{section}{References}
     \nocite{*}

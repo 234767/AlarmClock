@@ -38,15 +38,6 @@ writeLCD(uint8 reg, uint8 data)
     delay2ms();
 }
 
-static void
-lcdBacklight(uint8 onOff)
-{
-	if (onOff == TRUE)
-	  IOSET0 = LCD_BACKLIGHT;
-	else
-	  IOCLR0 = LCD_BACKLIGHT;
-}
-
 void LcdCommand(unsigned char byte){
     writeLCD(0, byte);
 }
@@ -58,6 +49,15 @@ void LcdData(unsigned char byte){
 void clearDisplay() {
     LcdCommand(0x01); 
     delay2ms();
+}
+
+static void
+lcdBacklight(uint8 onOff)
+{
+	if (onOff == TRUE)
+	  IOSET0 = LCD_BACKLIGHT;
+	else
+	  IOCLR0 = LCD_BACKLIGHT;
 }
 
 void DisplayInit(void) {
@@ -95,16 +95,6 @@ void DisplayInit(void) {
     delay2ms();
 }
 
-void SetCursor(unsigned int line, unsigned int column){
-    if (column > 39)
-        column = 39;
-
-    if (line == 0)
-        LcdCommand(0x80 + column);
-    else 
-        LcdCommand(0xc0 + column);
-}
-
 void cursor_enable(unsigned char on) {
     if (on == FALSE) {
         LcdCommand(0x0c);
@@ -113,6 +103,16 @@ void cursor_enable(unsigned char on) {
         LcdCommand(0x0e);
     }
     delay37us();
+} 
+
+void SetCursor(unsigned int line, unsigned int column){
+    if (column > 39)
+        column = 39;
+
+    if (line == 0)
+        LcdCommand(0x80 + column);
+    else 
+        LcdCommand(0xc0 + column);
 }
 
 void LcdPrint(char* str){
