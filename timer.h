@@ -13,7 +13,7 @@ delayMs(uint16 delayLength, uint32 prescaler) {
   T0TCR = 0x00000002;                           //disable and reset Timer1
   T0PC  = prescaler;                            //set prescale
   T0MR0 = delayLength *                         //calculate no of timer ticks
-         ((CRYSTAL_FREQUENCY * 5) / (1000 * 1));
+         ((CRYSTAL_FREQUENCY * 5) / 1000);
   T0MCR = 0x00000006;                           //reset counter and stop timer on MR0 match
   T0TCR = 0x00000001;  
 }
