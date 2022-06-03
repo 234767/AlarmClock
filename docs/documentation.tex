@@ -30,7 +30,8 @@
         uint32,
         int8,
         int16,
-        int32
+        int32,
+	  RTC_Time
     }
 }
 
@@ -214,6 +215,139 @@
     \subsection{I\textsuperscript{2}C}
 
     \subsection{SPI}
+    
+    \subsection{Joystick}
+    	\begin{lstlisting}[caption = {Joystick get input function}]
+char getJoyInput(void) {
+    if (((IOPIN0 & KEYPIN_UP) == 0)) {
+		return 'u';
+	}
+	if (((IOPIN0 & KEYPIN_DOWN) == 0)) {
+		return 'd';
+	}
+	if (((IOPIN0 & KEYPIN_RIGHT) == 0)) {
+		return 'r';
+	}
+	if (((IOPIN0 & KEYPIN_LEFT) == 0)) {
+		return 'l';
+	}
+	if (((IOPIN0 & KEYPIN_CENTER) == 0)) {
+		return 'c';
+	}
+    return 0;
+}
+	\end{lstlisting}
+	The function checks if the joystick is utilized and return char corresponding to the current position of the joystick.
+
+	\begin{lstlisting}[caption = {Await joystick input function}]
+char waitForJoyInput(void){
+	while (1) {
+		char result = getJoyInput();
+		if (result != 0)
+			return result;
+		delay37us();
+	}
+}
+	\end{lstlisting}
+This function runs in an infinite loop, which ends when the result of the JoyInputFunction is not 0 (when there is some input from the joystick).
+
+	\begin{lstlisting}[caption = {Get button input function}]
+uint8 isButtonPressed(void) {
+	if ((IOPIN0 & PIN_BUTTON) == 0) {
+		return TRUE;
+	}
+	else {
+		return FALSE;
+	}
+}
+	\end{lstlisting}
+This function check wether the button on the board is pressed.
+
+    \subsection{RTC}
+	\begin{lstlisting}[caption = {RTC initialization}]
+	RTC_Time setTime, alarmTime, currentTime;
+
+
+    CCR = 0x01;
+	\end{lstlisting}
+
+	First, the structs for time to set, alarm time and current time are created. The RTC interrupts are disabled by writing 0x0 to Interrupt Location Register (ILR).  The clocks tick counter is also reset by writing 0x02 to the Clock Control Register (CCR), and disabled by writing 0x0. Next, the Counter Increment Interrupt (CIIR), which is responsible for incrementing seconds, is disabled. 
+
+Next, the prescaler is configured. Prescaler is a circuit used to reduce a high frequency electrical signal (for example from RTC) to a lower frequency by integer division. After calculating the value of a prescaler integer:
+\[ \left(\frac{\mathrm{PCLK}}{32768}\right) - 1 \]
+and value of prescaler fraction:
+\[ \mathrm{PCLK} - \left((\mathrm{PREINT} + 1) \cdot 32768\right) \]
+Those values are written to Prescaler Integer Register (PREINT) and Prescaler Fraction Register (PREFRAC) registers.
+
+Finally, the time is read from EEPROM, written into setTime struct and set using RTC\_SetTime function. At the end of initialization 0x01 is writtent to Clock Control Register (CCR), which enables the timer counters.
+
+	\begin{lstlisting}[caption = {RTC struct}]
+typedef struct
+{
+	uint8 seconds;
+	uint8 minutes;
+	uint8 hours;
+} 
+	\end{lstlisting}
+	The struct consists of three 8 bit unsigned integer numbers, each one for seconds, minutes and hours fields.
+
+	\begin{lstlisting}[caption = {Setting time in the register function}]
+void RTC_SetTime(RTC_Time Time)
+{
+	SEC = Time.seconds;
+	MIN = Time.minutes;
+	HOUR = Time.hours;
+}
+	\end{lstlisting}
+	The function uses data stored in the parsed struct and writes it to counters from Time Register Group. SEC and MIN are 6 bit, and the HOUR counter is 5 bit.
+
+	\begin{lstlisting}[caption = {Setting alarm time in the register function}]
+void RTC_Set_AlarmTime(RTC_Time AlarmTime)
+{
+	ALSEC = AlarmTime.seconds;
+	ALMIN = AlarmTime.minutes;
+	ALHOUR = AlarmTime.hours;
+}
+	\end{lstlisting}
+	The function uses data stored in the parsed struct and writes it to counters from Alarm Register Group. Similarly to the Time Register Group, ALSEC and ALMIN are 6 bit, and the ALHOUR counter is 5 bit.
+
+	\begin{lstlisting}[caption = {Getting time from the register function}]
+RTC_Time RTC_GetTime(void)
+{
+	RTC_Time time;
+
+	time.seconds = SEC;
+	time.minutes = MIN;
+	time.hours = HOUR;
+
+	return time;
+}
+	\end{lstlisting}
+	The function takes data from SEC, MIN and HOUR registers stored in Time Register Group, assigns it to the newly created RTC\_Time struct and returns it.
+
+	\begin{lstlisting}[caption = {Getting alarm time from the register function}]
+RTC_Time RTC_GetAlarmTime(void)
+{
+	RTC_Time AlarmTime;
+
+	AlarmTime.seconds = ALSEC;
+	AlarmTime.minutes = ALMIN;
+	AlarmTime.hours = ALHOUR;
+
+	return AlarmTime;
+}
+	\end{lstlisting}
+	Analogously, to the RTC\_GetTime function, this function takes data from ALSEC, ALMIN and ALHOUR registers stored in Alarm Register Group, assigns it to the newly created RTC\_Time struct and returns it.
+
+	\begin{lstlisting}[caption = {RTC\_Time struct comparator function}]
+bool RTC_Compare(RTC_Time t1, RTC_Time t2)
+{
+	return (t1.seconds == t2.seconds
+		&& t1.minutes == t2.minutes
+		&& t1.hours == t2.hours);
+}
+	\end{lstlisting}
+	The function is used to compare two RTC\_Time structs by comparing each field of the struct (seconds, minutes and hours).
 
     \subsection{Timer}
 
