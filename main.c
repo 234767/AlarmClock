@@ -30,6 +30,7 @@ uint8 mode;
 1 - setting hour
 2 - setting minute
 3 - setting second
+4 - alarm
 */
  
 static void displayTime(){
@@ -43,60 +44,7 @@ static void displayTime(){
     LcdData((currentTime.second / 10) + 0x30);
     LcdData((currentTime.second % 10) + 0x30);
 }
-#if 0
-static void onTimerFire(void) {
-    if (led12 == 0) {
-        IOCLR0 = (1 << 12);
-        led12 = 1;
-    }
-    else {
-        IOSET0 = (1 << 12);
-        led12 = 0;
-    }
- 
-    if (mode != 0) {
-        return;
-    }
-    //increment time by 1 second
-    currentTime.second++;
-    if (currentTime.second >= 60){
-        currentTime.second = 0;
-        currentTime.minute++;
-        if (currentTime.minute >= 60){
-            currentTime.minute = 0;
-            currentTime.hour++;
-            if (currentTime.hour >= 24){
-                currentTime.hour = 0;
-            }
-        }
-    }
- 
-    //display current time
-    displayTime();
-}
- 
-static void init_irq (tU32 period, tU8 duty_cycle)
-{
-    clearDisplay();
-    LcdPrint("InitIRQ");
-    //Zainicjuj VIC dla przerwań od Timera #1
-    VICIntSelect &= ~TIMER_1_IRQ;           //Przerwanie od Timera #1 przypisane do IRQ (nie do FIQ)
-    VICVectAddr5  = (tU32)onTimerFire;         //adres procedury przerwania
-    VICVectCntl5  = VIC_ENABLE_SLOT | TIMER_1_IRQ_NO;
-    VICIntEnable  = TIMER_1_IRQ;            // Przypisanie i odblokowanie slotu w VIC od Timera #1
- 
-    T1TCR = TIMER_RESET;                    //Zatrzymaj i zresetuj
-    T1PR  = 0;                              //Preskaler nieużywany
-    T1MR0 = ((tU64)period)*((tU64)PERIPHERAL_CLOCK)/1000;
-    T1MR1 = (tU64)T1MR0 * duty_cycle / 100; //Wypełnienie
-    T1IR  = TIMER_ALL_INT;                  //Resetowanie flag przerwań
-    T1MCR = MR0_I | MR1_I | MR0_R;          //Generuj okresowe przerwania dla MR0 i dodatkowo dla MR1
-    T1TCR = TIMER_RUN;                      //Uruchom timer
-    clearDisplay();
-    LcdPrint("pomocyaaaaa");
-    return;
-}
-#endif
+
 void handleModeO(){
     if(isButtonPressed()){
         IOSET0 = (1 << 13);
@@ -216,7 +164,7 @@ static void sdelay (tU32 seconds)
 }
  
 int main(void) {
-    /*
+    
 	// RTC Init
 	// currentTime is used to retreive time from the RTC
 	RTC_Time setTime, alarmTime, currentTime;
@@ -230,8 +178,12 @@ int main(void) {
 	// PCLK for LPC2148 - 15MHz
 	// Prescaler Integer  = (PCLK/32768) – 1              => in our case 456   = 0x01C8
 	// Prescaler Fraction = PCLK – ((PREINT + 1) * 32768) => in our case 25024 = 0x61C0
-	PREINT = 0x01C8; 
-	PREFRAC = 0x61C0;
+	//PREINT = 0x01C8; 
+	//PREFRAC = 0x61C0;
+
+    // Try this:
+    PREINT = 449;
+    PREFRAC = 0;
 
 	// set starting time to 10:20:30 
 	setTime.seconds = 30;
@@ -256,7 +208,6 @@ int main(void) {
 
 	// to retreive time
 	currentTime = RTC_GetTime();
-    */
 
     led12 = 0;
     IODIR0 |= ((1 << 12) | (1<<13));
@@ -269,8 +220,6 @@ int main(void) {
     sdelay(1);
     LcdPrint("Siema2");
     sdelay(3);
-    // startTimer1(10, (uint32) onTimerFire); // every 1 second
-    //init_irq(1000,00);
     clearDisplay();
     LcdPrint("Startujemy");
     sdelay(1);
