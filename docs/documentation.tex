@@ -276,9 +276,9 @@ This function check wether the button on the board is pressed.
 	First, the structs for time to set, alarm time and current time are created. The RTC interrupts are disabled by writing 0x0 to Interrupt Location Register (ILR).  The clocks tick counter is also reset by writing 0x02 to the Clock Control Register (CCR), and disabled by writing 0x0. Next, the Counter Increment Interrupt (CIIR), which is responsible for incrementing seconds, is disabled. 
 
 Next, the prescaler is configured. Prescaler is a circuit used to reduce a high frequency electrical signal (for example from RTC) to a lower frequency by integer division. After calculating the value of a prescaler integer:
-\[ (PCLK/32768) – 1 \]
+\[ \left(\frac{\mathrm{PCLK}}{32768}\right) - 1 \]
 and value of prescaler fraction:
-\[ PCLK – ((PREINT + 1) * 32768) \]
+\[ \mathrm{PCLK} - \left((\mathrm{PREINT} + 1) \cdot 32768\right) \]
 Those values are written to Prescaler Integer Register (PREINT) and Prescaler Fraction Register (PREFRAC) registers.
 
 Finally, the time is read from EEPROM, written into setTime struct and set using RTC\_SetTime function. At the end of initialization 0x01 is writtent to Clock Control Register (CCR), which enables the timer counters.
