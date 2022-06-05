@@ -1,21 +1,23 @@
-#include "lpc214x.h"
+#include "lpc2xxx.h"
 #include "util.h"
+
+#define ALARM_PIN 15
 
 static void init_buzzer()
 {
-    PINSEL0 &= ~(3 << 14); // clear bits 15:14
+    PINSEL0 &= ~(3 << (2* ALARM_PIN)); // clear bits 15:14
 
-    IO0DIR |= (1 << 7); // set P0.7 as output
+    IODIR0 |= (1 << ALARM_PIN); // set P0.7 as output
 
-    IO0SET = (1 << 7); // set P0.7 high (buzzer off)
+    IOSET0 = (1 << ALARM_PIN); // set P0.7 high (buzzer off)
 }
 
 static void buzzer_on()
 {
-    IO0CLR = (1 << 7); // bring P0.7 low
+    IOCLR0 = (1 << ALARM_PIN); // bring P0.7 low
 }
 
 static void buzzer_off()
 {
-    IO0SET = (1 << 7); // set P0.7 high
+    IOSET0 = (1 << ALARM_PIN); // set P0.7 high
 }

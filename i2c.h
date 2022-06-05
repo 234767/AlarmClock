@@ -96,8 +96,7 @@ tS8  i2cPutChar(tU8 data);
 tS8  i2cGetChar(tU8  mode, tU8* pData);
 tS8  i2cWrite(tU8  addr, tU8* pData, tU16 len);
 tS8  i2cRead(tU8  addr, tU8* pBuf, tU16 len);
-
-
+tS8  i2cWriteWithWait(tU8 data);
 
 
 #endif

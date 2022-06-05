@@ -3,7 +3,6 @@
 
 #include "general.h"
 #include "i2c.h"
-
 #define EEPROM_SIZE       0x0100
 #define LOCAL_EEPROM_ADDR 0x0
 #define EEPROM_ADDR       0xA0
@@ -16,8 +15,8 @@ tS8 eepromWrite(tU16 addr,
                 tU8* pData,
                 tU16 len);
 
-tS8 eepromPageRead(tU16 address, 
-                   tU8* pBuf, 
+tS8 eepromPageRead(tU16 address,
+                   tU8* pBuf,
                    tU16 len);
 
 tS8 eepromPoll(void);
@@ -291,7 +290,6 @@ tS8 eepromWrite(tU16 addr,
             tU16 len)
 {
     tS8 retCode = 0;
-    tU8 status  = 0;
     tU8 i       = 0;
 
     do

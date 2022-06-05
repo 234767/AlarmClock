@@ -91,7 +91,7 @@ i2cInit(void)
   PINSEL0  |= 0x50;
 
   /* clear flags */
-  I2C_CONCLR = 0x6c;    
+  I2C_CONCLR = 0x6c;
 
   /* reset registers */
   I2C_SCLL   = ( I2C_SCLL   & ~I2C_REG_SCLL_MASK )   | I2C_REG_SCLL;
@@ -106,7 +106,7 @@ i2cInit(void)
  *    Generates a start condition on I2C when bus is free.
  *    Master mode will also automatically be entered.
  *
- *    Note: After a stop condition, you may need a bus free time before you 
+ *    Note: After a stop condition, you may need a bus free time before you
  *          can generate a new start condition.
  *
  * Returns:
@@ -160,7 +160,7 @@ i2cStart(void)
  *    Generates a start condition on I2C when bus is free.
  *    Master mode will also automatically be entered.
  *
- *    Note: After a stop condition, you may need a bus free time before you 
+ *    Note: After a stop condition, you may need a bus free time before you
  *          can generate a new start condition.
  *
  * Returns:
@@ -200,7 +200,7 @@ i2cRepeatStart(void)
     {
       /* clear SI flag */
       I2C_CONCLR = 0x08;
-    }    
+    }
   }
 
   /* clear start flag */
@@ -212,8 +212,8 @@ i2cRepeatStart(void)
 tS8
 i2cStop(void)
 {
-  I2C_CONSET |= 0x10; /* STO = 1, set stop flag */ 
-  I2C_CONCLR = 0x08;  /* clear SI flag          */ 
+  I2C_CONSET |= 0x10; /* STO = 1, set stop flag */
+  I2C_CONCLR = 0x08;  /* clear SI flag          */
 
   /* wait for STOP detected (while STO = 1) */
   while((I2C_CONSET & 0x10) == 0x10 )
@@ -248,7 +248,7 @@ i2cPutChar(tU8 data)
   {
     /* send data */
     I2C_DATA   = data;
-    I2C_CONCLR = 0x08; /* clear SI flag */ 
+    I2C_CONCLR = 0x08; /* clear SI flag */
     retCode    = I2C_CODE_OK;
   }
   else
@@ -291,13 +291,13 @@ i2cGetChar(tU8  mode,
     /* set ACK=0 (informs slave to send next byte) */
 
     I2C_CONSET |= 0x04; /* AA=1          */
-    I2C_CONCLR = 0x08;  /* clear SI flag */   
+    I2C_CONCLR = 0x08;  /* clear SI flag */
   }
   else if(mode == I2C_MODE_ACK1)
   {
     /* set ACK=1 (informs slave to send last byte) */
-    I2C_CONCLR = 0x04;     
-    I2C_CONCLR = 0x08; /* clear SI flag */ 
+    I2C_CONCLR = 0x04;
+    I2C_CONCLR = 0x08; /* clear SI flag */
   }
   else if(mode == I2C_MODE_READ)
   {
@@ -322,7 +322,7 @@ i2cGetChar(tU8  mode,
  * Description:
  *    Sends data on the I2C network
  *
- *    Note: After this function is run, you may need a bus free time before a 
+ *    Note: After this function is run, you may need a bus free time before a
  *          new data transfer can be initiated.
  *
  * Params:
@@ -370,7 +370,7 @@ i2cWrite(tU8  addr,
         /* get new status */
         status = i2cCheckStatus();
 
-        /* 
+        /*
          * SLA+W transmitted, ACK received or
          * data byte transmitted, ACK received
          */
@@ -407,7 +407,7 @@ i2cWrite(tU8  addr,
     /* get new status */
     status = i2cCheckStatus();
 
-    /* 
+    /*
      * SLA+W transmitted, ACK received or
      * data byte transmitted, ACK received
      */
@@ -444,7 +444,7 @@ i2cWaitTransmit(void)
     /* get new status */
     status = i2cCheckStatus();
 
-    /* 
+    /*
      * SLA+W transmitted, ACK received or
      * data byte transmitted, ACK received
      */
@@ -468,7 +468,7 @@ tS8
 i2cWriteWithWait(tU8 data)
 {
   tS8 retCode = 0;
-  
+
   retCode = i2cPutChar(data);
   while(retCode == I2C_CODE_BUSY)
   {
@@ -525,7 +525,7 @@ i2cMyWrite(tU8  addr,
  * Description:
  *    Read a specified number of bytes from the I2C network.
  *
- *    Note: After this function is run, you may need a bus free time before a 
+ *    Note: After this function is run, you may need a bus free time before a
  *          new data transfer can be initiated.
  *
  * Params:

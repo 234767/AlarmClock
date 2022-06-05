@@ -122,7 +122,28 @@
     The board schematic shows that for this purpose we must use P0.7 \mbox{\cite[p.9]{eduboard-man}}.
 
     \begin{program}
-        \code{4}{21}{buzzer.h}
+        \begin{lstlisting}
+#define ALARM_PIN 7
+
+static void init_buzzer()
+{
+    PINSEL0 &= ~(3 << (2* ALARM_PIN)); // clear bits 15:14
+
+    IODIR0 |= (1 << ALARM_PIN); // set P0.7 as output
+
+    IOSET0 = (1 << ALARM_PIN); // set P0.7 high (buzzer off)
+}
+
+static void buzzer_on()
+{
+    IOCLR0 = (1 << ALARM_PIN); // bring P0.7 low
+}
+
+static void buzzer_off()
+{
+    IOSET0 = (1 << ALARM_PIN); // set P0.7 high
+}
+        \end{lstlisting}
         \caption{Code used for controlling the buzzer pin}
     \end{program}
 
@@ -369,7 +390,21 @@ bool RTC_Compare(RTC_Time t1, RTC_Time t2)
     Finally we write 1 to the control register to enable the timer and start counting \cite[p.251]{lpc2148-manual}.
 
     \begin{program}[H]
-        \code{11}{19}{timer.h}
+        \begin{lstlisting}
+static void sdelay (tU32 seconds)
+{
+    T0TCR = TIMER_RESET;  
+    T0PR  = 12000000-1;             
+    T0MR0 = seconds;
+    T0IR  = TIMER_ALL_INT;          
+    T0MCR = MR0_S;      
+    T0TCR = TIMER_RUN;  
+
+    while (T0TCR & TIMER_RUN)
+    {
+    }
+}
+        \end{lstlisting}
         \caption{Timer delay function}
     \end{program}
 
