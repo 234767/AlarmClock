@@ -3,6 +3,7 @@
 \floatstyle{plain}
 \newfloat{program}{thp}{lst}
 \floatname{program}{Listing}
+\usepackage[margin=3.5cm]{geometry}
 \usepackage[hidelinks]{hyperref}
 \usepackage{xcolor}
 \usepackage{listings}
@@ -26,12 +27,18 @@
     morekeywords = {
         asm,
         uint8,
+        tU8,
         uint16,
+        tU16,
         uint32,
+        tU32,
         int8,
+        tS8,
         int16,
+        tS16,
         int32,
-	  RTC_Time
+        tS32,
+	    RTC_Time
     }
 }
 
@@ -76,8 +83,8 @@ GPIO, I\textsuperscript{2}C, SPI
 
 \section{Project Description}
 \subsection{General description}
-The project is an digital clock with the ability to set an alarm for a given hour.
-The device displays current time on the LCD display.
+The project is a digital clock with the ability to set an alarm for a given hour.
+The device displays current time on the	\textsc{lcd} display.
 Using button and joystick it is possible to set the current time, or set an alarm.
 If the alarm is set and the alarm time is the current time, the buzzer emits a sound until the alarm is turned off.
 
@@ -98,7 +105,7 @@ If the alarm is set and the alarm time is the current time, the buzzer emits a s
 \end{table}
 
 \subsection{Setting the alarm}
-The alarm setting mode it entered by holding down the button.
+The alarm setting mode is entered by holding down the button.
 When in alarm setting mode, the user can change the alarm time by selecting the digit with left/right movement, and selecting the value with up/down movement.
 After the correct time is selected, alarm is set by pressing the button.
 
@@ -115,8 +122,8 @@ When the alarm clock starts emmiting sound, the user can turn it off by pressing
 \section{Peripherals and interface configuration}
     
 \subsection{GPIO}
-Example of GPIO usage in our project is the for the buzzer. 
-The board schematic shows that for this purpose we must use P0.7 \mbox{\cite[p.9]{eduboard-man}}.
+Example of \textsc{gpio} usage in our project is for the buzzer. 
+The board schematic shows that for this purpose we must use {\small P0.7} \mbox{\cite[p.9]{eduboard-man}}.
 
 \begin{program}
 	\begin{lstlisting}
@@ -124,11 +131,11 @@ The board schematic shows that for this purpose we must use P0.7 \mbox{\cite[p.9
 
 static void init_buzzer()
 {
-    PINSEL0 &= ~(3 << (2* ALARM_PIN)); // clear bits 15:14
+    PINSEL0 &= ~(3 << (2 * ALARM_PIN)); // clear bits 15:14
 
-    IODIR0 |= (1 << ALARM_PIN); // set P0.7 as output
+    IODIR0  |= (1 << ALARM_PIN); // set P0.7 as output
 
-    IOSET0 = (1 << ALARM_PIN); // set P0.7 high (buzzer off)
+    IOSET0  =  (1 << ALARM_PIN); // set P0.7 high (buzzer off)
 }
 
 static void buzzer_on()
@@ -144,23 +151,23 @@ static void buzzer_off()
 	\caption{Code used for controlling the buzzer pin}
 \end{program}
 
-The pin we want to use can have many functionalities, so the first thing that needs to be done, is to set it as GPIO port.
-This is accomplished by writing to the PINSEL register. The bits 15:14 control port P0.7, and value 00 corresponds to GPIO functionality \cite[p.59]{lpc2148-manual}.
+The pin we want to use can have many functionalities, so the first thing that needs to be done, is to set it as \textsc{gpio} port.
+This is accomplished by writing to the \textsc{pinsel} register. The bits 15:14 control port {\small P0.7}, and value 0 corresponds to \textsc{gpio} functionality \cite[p.59]{lpc2148-manual}.
     
-Next, we need to set the port to function as output. This is done via the IODIR register, so we set the 7th bit to 1, which means that P0.7 will be used as output.
+Next, we need to set the port to function as output. This is done via the \textsc{iodir} register, so we set the 7th bit to 1, which means that {\small P0.7} will be used as output.
 
-Finally, we write the 7th bit to IOSET register, to set the pin high. 
+Finally, we write the 7th bit to \textsc{ioset} register, to set the pin high. 
 This is done to turn off the buzzer, so it does not make noise from the start.
 
-From the diagram \cite[p.9]{eduboard-man}, we can see that the buzzer is controlled via PNP transistor, so we turn it on by setting the pin low, and vice versa.
-To set the pin low, we write the appropriate bit to IOCLR register, and to set it high, we write to IOSET register.
+From the diagram \cite[p.9]{eduboard-man}, we can see that the buzzer is controlled via \textsc{pnp} transistor, so we turn it on by setting the pin low, and vice versa.
+To set the pin low, we write the appropriate bit to \textsc{ioclr} register, and to set it high, we write to \textsc{ioset} register.
 
-It is also possible to control the pin state directly via IOPIN register, however working with IOSET and IOCLR is easier, because it eliminates the need to think about logic operations necessary to avoid accidentally changing the state of other pins.
+It is also possible to control the pin state directly via \textsc{iopin} register, however working with \textsc{ioset} and \textsc{ioclr} is easier, because it eliminates the need to think about logic operations necessary to avoid accidentally changing the state of other pins.
 
 \subsection{LCD Display}
 \subsubsection{Setup}
-We begin setting up the lcd by configuring the IODIR registers to set the appropriate pins as output and clear them.
-The pins used are data pins P1.16 to P1.23, represented as {LCD\_DATA}, lcd enable pin P1.25 (LCD\_E), lcd \mbox{read/write} pin P0.22 (LCD\_RW), register select P1.24 (LCD\_RS), and backlight P0.30 (LCD\_BACKLIGHT).
+We begin setting up the lcd by configuring the \textsc{iodir} registers to set the appropriate pins as output and clear them.
+The pins used are data pins {\small P1.6} to {\small P1.3}, represented as \textsc{lcd\_data}, lcd enable pin {\small P1.5} (\textsc{lcd\_e}), lcd \mbox{read/write} pin {\small P0.2} (\textsc{lcd\_rw}), register select {\small P1.4} (\textsc{lcd\_rs}), and backlight {\small P0.0} (\textsc{lcd\_backlight}).
 
 Next, we proceed by sending a command $(38)_{16}$, which represents the `Function Set' instruction.
 We set the data length to 8 bits, and the number of display lines to 2.
@@ -173,7 +180,7 @@ Finally, we turn on the display, without cursor, and set cursor to home position
 
 All of the values to send, were taken from the instruction table in the display driver manual \cite[p.24]{display-man}
 
-\begin{program}[H]
+\begin{program}[h]
 	\begin{lstlisting}
 void DisplayInit(void) {
 	IODIR1 |= (LCD_DATA | LCD_E | LCD_RS);
@@ -215,7 +222,7 @@ void DisplayInit(void) {
 
 \subsubsection{Sending data to the display}
 
-\begin{program}[H]
+\begin{program}[h]
 	\begin{lstlisting}
 static void writeLCD(uint8 reg, uint8 data)
 {
@@ -258,25 +265,25 @@ void clearDisplay() {
 	\label{lst:display-util-functions}
 \end{program}
 
-The core of interaction with the LCD is the \texttt{writeLCD} function, which takes 2 parameters - register (0 --- instruction or 1 --- data),
+The core of interaction with the \textsc{lcd} is the \texttt{writeLCD} function, which takes 2 parameters - register (0 --- instruction or 1 --- data),
 and the actual 8-bit data we want to send. 
 We begin by setting the register select pin (lines 6--9).
 
 Before we send any data, we clear the read/write pin, to indicate that we want to write data to the display.
 Then we clear the data pins, and set the value in line 13.
-We first have to shift the value by 16 bits to the left, because we use pins P1.16--P1.23, and then we mask them with LCD\_DATA to make sure that we do not set any other pins.
+We first have to shift the value by 16 bits to the left, because we use pins {\small P1.6}--{\small P1.3}, and then we mask them with \textsc{lcd\_data} to make sure that we do not set any other pins.
 
 \pagebreak
-After setting the data pins, we set the LCD\_E pin, which starts the data read. 
-After some delay, we stop the data transmission by clearing LCD\_E pin and wait an additional delay before the next piece of data can be sent.
+After setting the data pins, we set the \textsc{lcd\_e} pin, which starts the data read. 
+After some delay, we stop the data transmission by clearing \textsc{lcd\_e} pin and wait an additional delay before the next piece of data can be sent.
 
 \subsubsection{Moving the cursor}
-The text that is currently displayed on the LCD is stored in so-called `display data RAM' (DDRAM). 
-The cursor is located at whatever address is currently stored at the DDRAM address counter \cite[p.21]{display-man}.
+The text that is currently displayed on the \textsc{lcd} is stored in so-called `display data \textsc{ram}' (\textsc{ddram}). 
+The cursor is located at whatever address is currently stored at the \textsc{ddram} address counter \cite[p.21]{display-man}.
 
-Therefore, we can change the cursor position, by changing the address in the AC.
-Luckily, the LDC controller has an instruction for just that purpose.
-It is used by sending a command with bit 7 set, followed by 7-bit DDRAM address.
+Therefore, we can change the cursor position, by changing the address in the \textsc{ac}.
+Luckily, the \textsc{lcd} controller has an instruction for just that purpose.
+It is used by sending a command with bit 7 set, followed by 7-bit \textsc{ddram} address.
 
 The first row is addresses $(00)_{16}$ -- $(27)_{16}$, and the second row is addresses $(40)_{16}$ -- $(67)_{16}$ \cite[p.11]{display-man}.
 
@@ -296,9 +303,9 @@ void SetCursor(unsigned int line, unsigned int column){
 	\caption{Function for controlling the cursor position}
 \end{program}
 
-Firstly, we limit the column to not be greater than 39, as the DDRAM only has 40 characters per line.
+Firstly, we limit the column to not be greater than 39, as the \textsc{ddram} only has 40 characters per line.
 
-Then, we send the `Set DDRAM address' command with the appropriate address.
+Then, we send the `Set \textsc{ddram} address' command with the appropriate address.
 If we want to set the position in the first line, we send $(80)_{16}$ (7-th bit set, indicating command) followed by the column, as the 1st line address starts from 0.
 If we want to set the position in the second line, instead of $(80)_{16}$ we use $(\mathrm{C0})_{16}$, which is $(80)_{16}$ (7th bit) + $(40)_{16}$ (starting address of the 2nd line).
 
@@ -324,24 +331,24 @@ void LcdPrint(char* str){
 
 \begin{program}
 	\begin{lstlisting}
-        char getJoyInput(void) {
-            if (((IOPIN0 & KEYPIN_UP) == 0)) {
-                return 'u';
-            }
-            if (((IOPIN0 & KEYPIN_DOWN) == 0)) {
-                return 'd';
-            }
-            if (((IOPIN0 & KEYPIN_RIGHT) == 0)) {
-                return 'r';
-            }
-            if (((IOPIN0 & KEYPIN_LEFT) == 0)) {
-                return 'l';
-            }
-            if (((IOPIN0 & KEYPIN_CENTER) == 0)) {
-                return 'c';
-            }
-            return 0;
-        }
+char getJoyInput(void) {
+    if (((IOPIN0 & KEYPIN_UP) == 0)) {
+        return 'u';
+    }
+    if (((IOPIN0 & KEYPIN_DOWN) == 0)) {
+        return 'd';
+    }
+    if (((IOPIN0 & KEYPIN_RIGHT) == 0)) {
+        return 'r';
+    }
+    if (((IOPIN0 & KEYPIN_LEFT) == 0)) {
+        return 'l';
+    }
+    if (((IOPIN0 & KEYPIN_CENTER) == 0)) {
+        return 'c';
+    }
+    return 0;
+}
 	\end{lstlisting}
 	\caption{Joystick get input function}
 \end{program}
@@ -349,15 +356,14 @@ The function checks if the joystick is utilized and return char corresponding to
 
 \begin{program}[H]
 	\begin{lstlisting}
-        char waitForJoyInput(void){
-            while (1) {
-                char result = getJoyInput();
-                if (result != 0)
-                    return result;
-                delay37us();
-            }
-        }
-                
+char waitForJoyInput(void){
+    while (1) {
+        char result = getJoyInput();
+        if (result != 0)
+            return result;
+        delay37us();
+    }
+}
 	\end{lstlisting}
 	\caption{Await joystick input function}
 \end{program}
@@ -365,45 +371,46 @@ This function runs in an infinite loop, which ends when the result of the JoyInp
 
 \begin{program}    
 	\begin{lstlisting}
-    uint8 isButtonPressed(void) {
-        if ((IOPIN0 & PIN_BUTTON) == 0) {
-            return TRUE;
-        }
-        else {
-            return FALSE;
-        }
+uint8 isButtonPressed(void) {
+    if ((IOPIN0 & PIN_BUTTON) == 0) {
+        return TRUE;
     }
+    else {
+        return FALSE;
+    }
+}
 	\end{lstlisting}
 	\caption{Get button input function}
 \end{program}      
 This function check wether the button on the board is pressed.
 
 \subsection{RTC}
+\subsubsection{Initialization}
 \begin{program}[H]
 	\begin{lstlisting}
-	RTC_Time setTime, alarmTime, currentTime;
-	ILR = 0x0; 
-	CCR = 0x02; 
-	CCR = 0x00;
-	CIIR = 0x00;
-	AMR = 0x00;  
-	PREINT = 2000;
-	PREFRAC = 50;
-	CIIR = 0x00;
-   	CCR = 0x01;
+RTC_Time setTime, alarmTime, currentTime;
+ILR = 0x0; 
+CCR = 0x02; 
+CCR = 0x00;
+CIIR = 0x00;
+AMR = 0x00;  
+PREINT = 2000;
+PREFRAC = 50;
+CIIR = 0x00;
+CCR = 0x01;
 	\end{lstlisting}
 	\caption{RTC initialization}
 \end{program}
 
-First, the structs for time to set, alarm time and current time are created. The RTC interrupts are disabled by writing 0x0 to Interrupt Location Register (ILR).  The clocks tick counter is also reset by writing 0x02 to the Clock Control Register (CCR), and disabled by writing 0x0. Next, the Counter Increment Interrupt (CIIR), which is responsible for incrementing seconds, is disabled. 
+First, the structs for time to set, alarm time and current time are created. The \textsc{rtc} interrupts are disabled by writing 0x0 to Interrupt Location Register (\textsc{ilr}).  The clocks tick counter is also reset by writing 0x02 to the Clock Control Register (\textsc{ccr}), and disabled by writing 0x0. Next, the Counter Increment Interrupt (\textsc{ciir}), which is responsible for incrementing seconds, is disabled. 
 
-Next, the prescaler is configured. Prescaler is a circuit used to reduce a high frequency electrical signal (for example from RTC) to a lower frequency by integer division. After calculating the value of a prescaler integer:
+Next, the prescaler is configured. Prescaler is a circuit used to reduce a high frequency electrical signal (for example from \textsc{rtc}) to a lower frequency by integer division. After calculating the value of a prescaler integer:
 \[ \left(\frac{\mathrm{PCLK}}{32768}\right) - 1 \]
 and value of prescaler fraction:
 \[ \mathrm{PCLK} - \left((\mathrm{PREINT} + 1) \cdot 32768\right) \]
-Those values are written to Prescaler Integer Register (PREINT) and Prescaler Fraction Register (PREFRAC) registers.
+Those values are written to Prescaler Integer Register (\textsc{preint}) and Prescaler Fraction Register (\textsc{prefrac}) registers.
 
-Finally, the time is read from EEPROM, written into setTime struct and set using RTC\_SetTime function. At the end of initialization 0x01 is writtent to Clock Control Register (CCR), which enables the timer counters.
+Finally, the time is read from \textsc{eeprom}, written into setTime struct and set using RTC\_SetTime function. At the end of initialization 0x01 is writtent to Clock Control Register (\textsc{ccr}), which enables the timer counters.
 
 \begin{program}[H]
 	\begin{lstlisting}
@@ -418,6 +425,7 @@ typedef struct
 \end{program}
 The struct consists of three 8 bit unsigned integer numbers, each one for seconds, minutes and hours fields.
 
+\subsubsection{Setting the time}
 \begin{program}[H]
 	\begin{lstlisting}
 void RTC_SetTime(RTC_Time Time)
@@ -429,7 +437,7 @@ void RTC_SetTime(RTC_Time Time)
 	\end{lstlisting}
 	\caption{Setting time in the register function}
 \end{program}
-The function uses data stored in the parsed struct and writes it to counters from Time Register Group. SEC and MIN are 6 bit, and the HOUR counter is 5 bit.
+The function uses data stored in the parsed struct and writes it to counters from Time Register Group. \textsc{sec} and \textsc{min} are 6 bit, and the \textsc{hour} counter is 5 bit.
 
 \begin{program}[H]
 	\begin{lstlisting}
@@ -442,8 +450,9 @@ void RTC_Set_AlarmTime(RTC_Time AlarmTime)
 	\end{lstlisting}
 	\caption{Setting alarm time in the register function}
 \end{program}
-The function uses data stored in the parsed struct and writes it to counters from Alarm Register Group. Similarly to the Time Register Group, ALSEC and ALMIN are 6 bit, and the ALHOUR counter is 5 bit.
+The function uses data stored in the parsed struct and writes it to counters from Alarm Register Group. Similarly to the Time Register Group, \textsc{alsec} and \textsc{almin} are 6 bit, and the \textsc{alhour} counter is 5 bit.
 
+\subsubsection{Reading the time}
 \begin{program}[H]
 	\begin{lstlisting}
 RTC_Time RTC_GetTime(void)
@@ -459,7 +468,7 @@ RTC_Time RTC_GetTime(void)
 	\end{lstlisting}
 	\caption{Getting time from the register function}
 \end{program}
-The function takes data from SEC, MIN and HOUR registers stored in Time Register Group, assigns it to the newly created RTC\_Time struct and returns it.
+The function takes data from \textsc{sec}, \textsc{min} and \textsc{hour} registers stored in Time Register Group, assigns it to the newly created RTC\_Time struct and returns it.
 
 \begin{program}[H]
 	\begin{lstlisting}
@@ -476,7 +485,8 @@ RTC_Time RTC_GetAlarmTime(void)
 	\end{lstlisting}
 	\caption{Getting alarm time from the register function}
 \end{program}
-Analogously, to the RTC\_GetTime function, this function takes data from ALSEC, ALMIN and ALHOUR registers stored in Alarm Register Group, assigns it to the newly created RTC\_Time struct and returns it.
+Analogously, to the RTC\_GetTime function, this function takes data from \textsc{ALSEC}, \textsc{almin} and \textsc{alhour} registers stored in Alarm Register Group, assigns it to the newly created RTC\_Time struct and returns it.
+
 
 \begin{program}[H]
 	\begin{lstlisting}
@@ -491,18 +501,21 @@ bool RTC_Compare(RTC_Time t1, RTC_Time t2)
 \end{program}
 The function is used to compare two RTC\_Time structs by comparing each field of the struct (seconds, minutes and hours).
 
+\pagebreak
 \subsection{Timer}
 
 For producing precise delay we use timer 0 of the microcontroller.
     
-To start, we reset and disable the timer, by writing $2$ (bit 1) to the timer control register (TCR). 
+To start, we reset and disable the timer, \textsc{timer\_reset} to the timer control register (\textsc{tcr}). 
 Then, we can write the values controlling the delay.
-Firstly we write the prescaler to prescale counter (PC).
-Then, we write actual delay length to the match register 0 (MR0).
-We calculate the necessary number of ticks by multiplying the clock frequency by 5, which is the PLL multiplier, and then dividing by 1000 to get ticks per 1 ms instead of 1 s.
+Firstly we write the prescaler to prescale counter (\textsc{pc}).
+We have chosen the value \(12000000 - 1\), becuse the clock runs at 12\ MHz.
+Then, we write actual delay length to the match register 0 ({\small MR0}).
 
-Then, we write 6 (bits 1 and 2) to the match control register (MCR) to indicate that we want the timer to stop and reset at MR0 match.
-Finally we write 1 to the control register to enable the timer and start counting \cite[p.251]{lpc2148-manual}.
+Then, we write {\small MR0\_S} to match control register (\textsc{mcr}) to indicate that we want the timer to stop at {\small MR0} match.
+We write \textsc{timer\_run} to the control register to enable the timer and start counting \cite[p.251]{lpc2148-manual}.
+
+Finally, we enter a loop to wait until the timer is running.
 
 \begin{program}[H]
 	\begin{lstlisting}
@@ -523,16 +536,182 @@ static void sdelay (tU32 seconds)
 	\caption{Timer delay function}
 \end{program}
 
-\subsection{I2C}
-
+\clearpage
 \subsection{EEPROM}
 
+We use I2C to save in \textsc{eeprom} the alarm time chosen by the user. Then, the alarm time will be read in order to compare it with the real time.
+To initialise I2C, we set pins {\small P0.02} and {\small P0.03} to value 01 with operation:
+\begin{lstlisting}  
+PINSEL0 |= 0x50; 
+\end{lstlisting}    
+Next, the flags are cleared: 
+\begin{lstlisting}
+I2C_CONCLR = 0x6c; 
+\end{lstlisting} 
+Then we set registers with following operations:
+\begin{lstlisting}
+I2C_SCLL   = ( I2C_SCLL   & ~I2C_REG_SCLL_MASK )   | I2C_REG_SCLL; 
+I2C_SCLH   = ( I2C_SCLH   & ~I2C_REG_SCLH_MASK )   | I2C_REG_SCLH; 
+I2C_ADDR   = ( I2C_ADDR   & ~I2C_REG_ADDR_MASK )   | I2C_REG_ADDR; 
+I2C_CONSET = ( I2C_CONSET & ~I2C_REG_CONSET_MASK ) | I2C_REG_CONSET;
+\end{lstlisting}
+All of the above operations are collected in the function “i2cInit”.
+
+\textsc{eeprom} (electrically erasable programmable read-only memory) is used to save the alarm time chosen by user. We operate it using I2C interface. 
+To save the time to memory we initialise I2C and then use the function ``eepromWrite'' that has 3 parameters:
+\begin{enumerate}
+    \item Hexadecimal address from which data is to be written to the memory (In our case always 0x0000)
+    \item Type of data saved (array of chars)
+    \item Number of characters including the address (length)
+\end{enumerate}
+
+As the address and length is always the same, we created second function (``save'') that only takes one argument, which is data to be saved.
+To read from the memory, we also have to initialise I2C and use function ``eepromPageRead''
+which has 3 identical parameters as the ``eepromWrite''. 
+To simplify the use, we created second function (``read'') 
+that only takes one argument, which is data ``container'' to which we want to read the time.
+Both functions stop I2C before terminating.
+
+
+\begin{program}[h]
+    \begin{lstlisting}
+tS8 eepromPageRead(tU16 address, tU8* pBuf, tU16 len)
+{
+
+tS8  retCode = 0;
+tU8  status  = 0;
+tU16 i       = 0;
+
+/* Write 4 bytes, see 24C256 Random Read */
+retCode = eepromStartRead(I2C_EEPROM_ADDR, address);
+
+
+if( retCode == I2C_CODE_OK )
+{
+ /* wait until address transmitted and receive data */
+ for(i = 1; i <= len; i++ )
+ {
+     /* wait until data transmitted */
+     while(1)
+     {
+         /* Get new status */
+         status = i2cCheckStatus();
+
+         if(( status == 0x40 ) || ( status == 0x48 ) || ( status == 0x50 ))
+         {
+             /* Data received */
+
+             if(i == len )
+             {
+                 /* Set generate NACK */
+                 retCode = i2cGetChar( I2C_MODE_ACK1, pBuf );
+             }
+             else
+             {
+                 retCode = i2cGetChar( I2C_MODE_ACK0, pBuf );
+             }
+
+             /* Read data */
+             retCode = i2cGetChar( I2C_MODE_READ, pBuf );
+             while( retCode == I2C_CODE_EMPTY )
+             {
+                 retCode = i2cGetChar( I2C_MODE_READ, pBuf );
+             }
+             pBuf++;
+
+             break;
+         }
+         else if( status != 0xf8 )
+         {
+             /* ERROR */
+             i = len;
+             retCode = I2C_CODE_ERROR;
+             break;
+         }
+     }
+ }
+}
+
+/* Generate Stop condition */
+i2cStop();
+
+return retCode;
+
+}
+    \end{lstlisting}
+    \caption{\textsc{eeprom} page read function}
+\end{program}
+
+
+\begin{program}[h]
+    \begin{lstlisting}
+tS8 eepromWrite(tU16 addr, tU8* pData, tU16 len)
+{
+
+tS8 retCode = 0;
+tU8 i       = 0;
+
+do
+{
+
+    /* generate Start condition */
+    retCode = i2cStart();
+    if(retCode != I2C_CODE_OK)
+        break;
+
+
+    /* write EEPROM I2C address */
+    retCode = i2cWriteWithWait(I2C_EEPROM_ADDR);
+    if(retCode != I2C_CODE_OK)
+        break;
+
+    /* write offset low in EEPROM space  */
+    retCode = i2cWriteWithWait( (tU8)(addr & 0xFF));
+    if(retCode != I2C_CODE_OK)
+        break;
+
+    /* write data */
+    for(i = 0; i <len; i++)
+    {
+        retCode = i2cWriteWithWait(*pData);
+        if(retCode != I2C_CODE_OK)
+            break;
+
+        pData++;
+    }
+
+} while(0);
+
+/* generate Stop condition */
+i2cStop();
+
+
+return retCode;
+} 
+    \end{lstlisting}
+    \caption{\textsc{eeprom} write function}
+\end{program}
+
+\begin{program}[h]
+    \begin{lstlisting}
+void save(tU8 string[]){
+    eepromWrite(0x0000, string, 2);
+}
+
+void read(tU8 string[]){
+    eepromPageRead(0x0000, string, 2);
+}
+    \end{lstlisting}
+    \caption{Helper functions for \textsc{eeprom}}
+\end{program}
+
+\clearpage
 \section{Failure Mode and Effect Analysis}
 
 \subsection{Failure severity}
 
 The project depends on its components to be able to function properly.
-However, not all of them are equally impornant --- some are necessary for the usage of the project,
+However, not all of them are equally important --- some are necessary for the usage of the project,
 while others just provide additional functionalities.
 
 The table bellow presents a list of components considered in failure effect analysis, as well as the significance of it's failure.
@@ -553,20 +732,20 @@ The table bellow presents a list of components considered in failure effect anal
 	\end{tabular}
 	\caption{Severity of component's failure}
 \end{table}
-\footnotetext[1]{Long-term power supply failures are of critical severity, but in case of short pause in power delivery, the system is able to recover using the RTC and the data stored in EEPROM}
+\footnotetext[1]{Long-term power supply failures are of critical severity, but in case of short pause in power delivery, the system is able to recover using the data stored in \textsc{eeprom}}
 
-The most crucial elements of the project are the microcontroller, power supply, and RTC.
+The most crucial elements of the project are the microcontroller, power supply, and \textsc{rtc}.
 The microcontroller must not fail, because it is responsible for all of the logic of the device.
 The power supply must also be functioning, because there is no backup battery able to sustain the device operation.
-The RTC is necessary for the operation of the project, because it ensures the correctness of the told time.
+The \textsc{rtc} is necessary for the operation of the project, because it ensures the correctness of the told time.
 
-The failure of the LCD display is of high severity, because is is the main way of interacting with the clock.
+The failure of the \textsc{lcd} display is of high severity, because this is the main way of interacting with the clock.
 However, it is not of critical severity, because even without the display, if the alarm was set, it will ring at the specified time.
 
 The buzzer, button and joystick are used for the alarm, which is the additional functionality of the clock.
 Without them it is still possible to use the device for telling the current time.
 
-The EEPROM failure is of the low severity, because it is only used for backup storage in case of short power supply failure.
+The \textsc{eeprom} failure is of the low severity, because it is only used for backup storage in case of short power supply failure.
 In the normal circumstances, it's failure would not at all impact the usability of the device.
 
 \subsection{Failure detection}
@@ -574,11 +753,11 @@ In the normal circumstances, it's failure would not at all impact the usability 
 The failure of the microcontroller would be very easily noticeable, as it would probably result in a complete failure of the device.
     
 The lack of power is also easily detectable, because the device will not show anything.
-The board is equipped with a small green power indicator LED \cite{eduboard-man}. 
+The board is equipped with a small green power indicator \textsc{led} \cite{eduboard-man}. 
 Should that indicator not be lit, means the failure of the power supply.
 
-The LCD failure is also trivial to notice, as the display would not be showing anything.
-To differentiate it from the power supply failure, the power indicator LED should be inspected.
+The \textsc{lcd} failure is also trivial to notice, as the display would not be showing anything.
+To differentiate it from the power supply failure, the power indicator \textsc{led} should be inspected.
 
 \addcontentsline{toc}{section}{References}
 \nocite{*}
