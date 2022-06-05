@@ -266,9 +266,15 @@ This function check wether the button on the board is pressed.
     \subsection{RTC}
 	\begin{lstlisting}[caption = {RTC initialization}]
 	RTC_Time setTime, alarmTime, currentTime;
-
-
-    CCR = 0x01;
+	ILR = 0x0; 
+	CCR = 0x02; 
+	CCR = 0x00;
+	CIIR = 0x00;
+	AMR = 0x00;  
+	PREINT = 2000;
+	PREFRAC = 50;
+	CIIR = 0x00;
+   	CCR = 0x01;
 	\end{lstlisting}
 
 	First, the structs for time to set, alarm time and current time are created. The RTC interrupts are disabled by writing 0x0 to Interrupt Location Register (ILR).  The clocks tick counter is also reset by writing 0x02 to the Clock Control Register (CCR), and disabled by writing 0x0. Next, the Counter Increment Interrupt (CIIR), which is responsible for incrementing seconds, is disabled. 
