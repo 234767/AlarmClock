@@ -1,4 +1,4 @@
-#include "lpc2xxx.h"
+#include <lpc2xxx.h>
 
 static void sdelay (tU32 seconds)
 {
